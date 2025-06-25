@@ -1,6 +1,7 @@
 ;; Модуль для препроцессинга изображений
 
 (import PIL [Image])
+(import PIL.ImageStat [Stat])
 (import os)
 
 (defn preprocess_image [image-path]
@@ -18,7 +19,11 @@
   
   (try
     (with [img (Image.open image-path)]
-      (.resize (.convert img "L") (tuple [150 150]) Image.Resampling.LANCZOS))
+      (setv grayscale-img (.convert img "L"))
+      (setv resized-img (.resize grayscale-img (tuple [150 150]) Image.LANCZOS))
+      (setv mean-value (get (. (Stat resized-img) mean) 0))
+
+      (.point resized-img (fn [p] (if (> p mean-value) 255 0)) "L"))
     (except [e Exception]
       (print f"Ошибка при обработке изображения {image-path}: {e}")
       (raise e))))
