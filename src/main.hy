@@ -3,7 +3,9 @@
 (.append sys.path ".")
 
 (import src.models.gene [create-random-genotype])
+(import src.utils.preprocess_image [preprocess_image])
 (import random :as rnd)
+(import os)
 (import numpy :as np)
 
 ;; Константы эволюционного алгоритма
@@ -126,10 +128,22 @@
   (np.random.rand 150 150))
 
 (defn main []  
+  (when (< (len sys.argv) 2)
+      (do
+        (print "Использование: hy main.hy <путь_к_изображению>")
+	(sys.exit 1)))
+
+  (setv image-path (get sys.argv 1))
+
+  (setv processed-img (preprocess_image image-path))
+  (setv [base-name ext] (os.path.splitext (os.path.basename image-path)))
+  (setv output-name (+ base-name "_processed" ext))
+  (setv output-path (os.path.join (os.path.dirname image-path) output-name))
+  
+  ;; Save processed image
+  (processed-img.save output-path)
+  (setv target-image (/ (np.array processed-img) 255.0))
   ;; Создаём фиктивное целевое изображение
-  (setv target-image (create-dummy-target))
-  (print (.format "Создано целевое изображение размером {}" target-image.shape))
-  (print)
   
   ;; Запускаем эволюцию
   (setv simulation (EvolutionSimulation target-image))
