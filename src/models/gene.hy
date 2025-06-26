@@ -187,7 +187,7 @@
       (.append genes (create-random-gene i)))
     (Genotype genes)))
 (defclass Phenotype []
-  "Класс для представления сегенрированного определённым генотипом фенотипа."
+  "Класс для представления сгенерированного определённым генотипом фенотипа."
   (defn draw-segments [self]
     (let [canvas (np.ones [150, 150] :dtype float)]
       (for [segment self.segments]
