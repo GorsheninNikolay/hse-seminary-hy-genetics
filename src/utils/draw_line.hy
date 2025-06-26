@@ -1,19 +1,18 @@
-(import numpy as np)
+(import numpy :as np)
 
 (defn draw-line [canvas start-x start-y end-x end-y width]
   (let [dx (- end-x start-x)
         dy (- end-y start-y)
         l2 (+ (* dx dx) (* dy dy)) ;length squared
-        half-width (/ width 2.0)
+        half-width (int (/ width 2.0))
         thresh-sq (* half-width half-width)
-        pad (min 150 (max 1 (int (+ half-width 0.5))))
-        min-x (max 0 (- (min start-x end-x) pad))
-        max-x (min 149 (+ (max start-x end-x) pad))
-        min-y (max 0 (- (min start-y end-y) pad))
-        max-y (min 149 (+ (max start-y end-y) pad))]
+        min-x (max 0 (- (min start-x end-x) half-width))
+        max-x (min 149 (+ (max start-x end-x) half-width))
+        min-y (max 0 (- (min start-y end-y) half-width))
+        max-y (min 149 (+ (max start-y end-y) half-width))]
     (for [x (range min-x (+ max-x 1))]
       (for [y (range min-y (+ max-y 1))]
-        (let [dist-sq (if (zero? l2) ;point case
+        (let [dist-sq (if (= 0 l2) ;point case
                          (let [dx (- x start-x)
                                dy (- y start-y)]
                            (+ (* dx dx) (* dy dy)))
@@ -28,5 +27,5 @@
                                dist-y (- y proj-y)]
                            (+ (* dist-x dist-x) (* dist-y dist-y))))]
           (when (<= dist-sq thresh-sq)
-            (setv (get canvas [y x]) 0))))))
+            (setv (get canvas (tuple [y x])) 0))))))
   canvas)
