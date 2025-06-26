@@ -186,3 +186,23 @@
     (for [i (range 16)]
       (.append genes (create-random-gene i)))
     (Genotype genes)))
+(defclass Phenotype []
+  "Класс для представления сгенерированного определённым генотипом фенотипа."
+  (defn draw-segments [self]
+    (let [canvas (np.ones [150, 150] :dtype float)]
+      (for [segment self.segments]
+        (let [start-x (get segment 0)
+              start-y (get segment 1)
+              end-x (get segment 2)
+              end-y (get segment 3)]
+          (draw-line canvas start-x start-y end-x end-y
+           Phenotype.SEGMENT_WIDTH)))
+      canvas))
+
+  (defn __init__ [self genotype]
+    "Инициализация фенотипа."
+    (setv self.genotype genotype)
+    (setv self.segments (genotype.generate-segments 75 149))
+    (setv SEGMENT_WIDTH 4)
+    (setv self.canvas (self.draw-segments))))
+
