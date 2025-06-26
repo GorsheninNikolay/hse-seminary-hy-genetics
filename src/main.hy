@@ -2,8 +2,9 @@
 ;; Добавляем корень проекта в sys.path, чтобы найти пакет src
 (.append sys.path ".")
 
-(import src.models.gene [create-random-genotype])
+(import src.models.gene [create-random-genotype Genotype Phenotype])
 (import src.utils.preprocess_image [preprocess_image])
+(import PIL [Image])
 (import random :as rnd)
 (import os)
 (import numpy :as np)
@@ -33,10 +34,12 @@
   
   (defn fitness-euclidean [self genotype]
     "Вычисляет fitness показатель схожести с целевым изображением."
-    ;; Упрощённая версия - считаем случайное значение
-    ;; TODO: Добавить свёртку с целевым изображением
-    (rnd.uniform 0 1))
-  
+      (let [phenotype (Phenotype genotype)
+            phenotype-img (. phenotype canvas)
+	    mse (np.mean (np.square (- phenotype-img self.target-image)))]
+        ;; Преобразуем MSE в fitness (чем выше - тем лучше)
+        (/ 1.0 (+ 1.0 mse))))
+
   (defn evaluate-population [self]
     "Оценивает fitness всей популяции."
     (setv fitness-scores [])
@@ -148,6 +151,12 @@
   ;; Запускаем эволюцию
   (setv simulation (EvolutionSimulation target-image))
   (setv best-genotype (simulation.evolve))
+
+  (setv best-phenotype (Phenotype best-genotype))
+  (setv best-img (Image.fromarray (.astype (* 255.0 best-phenotype.canvas)
+  np.uint8)))
+  (best-img.save (os.path.join (os.path.dirname image-path)
+  "best_biomorph.png"))
   (print (.format "Лучший генотип: {}" best-genotype))
   (print (.format "Длина сегментов: {}" (best-genotype.get-segment-length)))
   (print (.format "Сгенерированные сегменты: {}" (best-genotype.generate-segments 0 0))))

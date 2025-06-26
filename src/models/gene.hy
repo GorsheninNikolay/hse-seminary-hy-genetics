@@ -1,8 +1,12 @@
 ;; Класс для представления гена в эволюционной симуляции биоморфов
+(import sys)
+(.append sys.path ".")
+(import src.utils.draw_line [draw-line])
 
 (import random :as rnd)
 (import math)
 (import itertools :as it)
+(import numpy :as np)
 
 (defclass Gene []
   "Класс для представления гена."
@@ -136,10 +140,6 @@
     "Возвращает длину сегментов для всего генотипа."
     (self.length-gene.get-segment-length))
   
-  (defn select-random-skeleton-genes [self count]
-    "Выбирает случайные гены скелета для генерации."
-    (rnd.sample self.skeleton-genes count))
-  
   (defn mutate [self]
     "Мутирует случайный ген в генотипе."
     (let [new-genes (list self.genes)
@@ -155,11 +155,10 @@
     (let [segments []
           current-x start-x
           current-y start-y
-          segment-length (self.get-segment-length)
-          selected-genes (self.select-random-skeleton-genes 7)]
+          segment-length (self.get-segment-length)]
       
       ;; Генерируем сегменты на основе выбранных генов
-      (for [gene selected-genes]
+      (for [gene self.skeleton-genes]
         (let [segment (gene.generate-segment current-x current-y segment-length)]
           (when segment
               (do
@@ -188,6 +187,14 @@
     (Genotype genes)))
 (defclass Phenotype []
   "Класс для представления сгенерированного определённым генотипом фенотипа."
+  (setv SEGMENT_WIDTH 4)
+
+  (defn __init__ [self genotype]
+    "Инициализация фенотипа."
+    (setv self.genotype genotype)
+    (setv self.segments (genotype.generate-segments 75 149))
+    (setv self.canvas (self.draw-segments)))
+
   (defn draw-segments [self]
     (let [canvas (np.ones [150, 150] :dtype float)]
       (for [segment self.segments]
@@ -197,12 +204,4 @@
               end-y (get segment 3)]
           (draw-line canvas start-x start-y end-x end-y
            Phenotype.SEGMENT_WIDTH)))
-      canvas))
-
-  (defn __init__ [self genotype]
-    "Инициализация фенотипа."
-    (setv self.genotype genotype)
-    (setv self.segments (genotype.generate-segments 75 149))
-    (setv SEGMENT_WIDTH 4)
-    (setv self.canvas (self.draw-segments))))
-
+      canvas)))
