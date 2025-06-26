@@ -15,7 +15,7 @@
   "
 
   (when (not (os.path.isfile image-path))
-    (raise (FileNotFoundError f"Файл не найден по указанному пути: {image-path}")))
+    (raise (FileNotFoundError (.format "Файл не найден по указанному пути: {}" image-path))))
   
   (try
     (with [img (Image.open image-path)]
@@ -25,7 +25,7 @@
 
       (.point resized-img (fn [p] (if (> p mean-value) 255 0)) "L"))
     (except [e Exception]
-      (print f"Ошибка при обработке изображения {image-path}: {e}")
+      (print (.format "Ошибка при обработке изображения {}: {}" image-path e))
       (raise e))))
 
 (defn preprocess_and_save [input-path output-path]
